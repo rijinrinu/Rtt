@@ -1,0 +1,1232 @@
+""" 
+
+LOGIN PAGE
+
+Parameters: 
+HTTP request 
+ 
+Returns: html page 
+""" 
+msg="" if(request.POST): 
+email=request.POST.get("txtEmail") pwd=request.POST.get("txtPassword") 
+s="select count(*) from tbllogin where username='"+email+"'" 
+c.execute(s) i=c.fetchone() if(i[0]>0): s="select * from tbllogin where username='"+email+"'" c.execute(s) i=c.fetchone() if(i[1]==pwd): 
+request.session['email'] = email if(i[3]=="1"): if(i[2]=="admin"): 
+return HttpResponseRedirect("/adminhome") elif(i[2]=="architect"): 
+return HttpResponseRedirect("/architecthome") elif(i[2]=="designer"): 
+return HttpResponseRedirect("/designerhome") elif(i[2]=="contractor"): 
+return HttpResponseRedirect ("/contractor home") elf (I [2] =="customer"): return 
+
+
+
+HttpResponseRedirect("/customerhome") else: msg="You are not authenticated to login" else: msg="Incorrect password" else: 
+msg="User doesnt exist" 
+return render(request,"login.html",{"msg":msg}) 
+
+CUSTOMER REGISTRATION
+
+customer(request): 
+""" 
+The function for customer registration 
+ 
+
+ 
+Parameters: 
+HTTP request 
+ 
+ 
+Returns: html page 
+""" 
+msg="" if(request.POST): 
+name=request.POST.get("txtName") address=request.POST.get("txtAddress") contact=request.POST.get("txtContact") email=request.POST.get("txtEmail") pwd=request.POST.get("txtPassword") aadhar=request.FILES["txtaadhar"] fs=FileSystemStorage() 
+filename=fs.save(aadhar.name,aadhar) uploaded_file_url=fs.url(filename) 
+s="select count(*) from tbllogin where username='"+str(email)+"'" c.execute(s) i=c.fetchone() if(i[0]>0): 
+msg="User already registered" else: 
+s="insert into tblcustomer(cName,cAddress,cContact,cEmail,aadhar) values('"+str(name)+"','"+str(address)+"','"+str(contact)+"','"+str(email)+"','"+str(uploaded_file_url)+"')" try: 
+c.execute(s) db.commit() except: 
+msg="Sorry registration error" else: 
+
+
+
+s="insert into tbllogin (username,password,utype,status) values('"+str(email)+"','"+str(pwd)+"','customer','1')" try: 
+c.execute(s) db.commit() except: 
+msg="Sorry login error" else: 
+msg="Registration successfull" 
+return render(request,"customer.html",{"msg":msg}) 
+
+ARCHITECT
+
+def architect(request): 
+""" 
+The function for architect registration 
+ 
+
+ 
+Parameters: 
+HTTP request 
+ 
+ 
+Returns: html page 
+""" 
+msg="" if(request.POST): 
+name=request.POST.get("txtName") address=request.POST.get("txtAddress") contact=request.POST.get("txtContact") quali=request.POST.get("txtquali") 
+ 
+qproof=request.FILES["proof"] fs=FileSystemStorage() filename=fs.save(qproof.name,qproof) uploaded_file=fs.url(filename) 
+ 
+email=request.POST.get("txtEmail") pwd=request.POST.get("txtPassword") 
+ 
+img=request.FILES["txtFile"] fs=FileSystemStorage() fileimg=fs.save(img.name,img) 
+
+uploaded_file_url=fs.url(fileimg) s="select count(*) from tbllogin where username='"+str(email)+"'" c.execute(s) i=c.fetchone() if(i[0]>0): 
+msg="User already registered" else: 
+s="insert into tblarchitect(aName,aAddress,aContact,aqualification,aqproof,aEmail,aPhoto) 
+values('"+str(name)+"','"+str(address)+"','"+str(contact)+"','"+str(quali)+"','"+str(uploaded_file)+"','"+str 
+(email)+"','"+str(uploaded_file_url)+"')" try: 
+c.execute(s) db.commit() except: 
+msg="Sorry registration error" else: 
+s="insert into tbllogin (username,password,utype,status) values('"+str(email)+"','"+str(pwd)+"','architect','0')" try: 
+c.execute(s) db.commit() except: 
+msg="Sorry login error" else: 
+msg="Registration successfull" 
+return render(request,"architect.html",{"msg":msg}) 
+
+DESIGNER REQUEST
+
+designer(request): 
+""" 
+The function for designer registration 
+ 	 
+ 
+Parameters: 
+HTTP request 
+ 
+ 
+Returns: html page 
+""" 
+msg="" if(request.POST): 
+
+
+
+name=request.POST.get("txtName") address=request.POST.get("txtAddress") contact=request.POST.get("txtContact") quali=request.POST.get("txtquali") qproof=request.FILES["txtproof"] fs=FileSystemStorage() filename=fs.save(qproof.name,qproof) uploaded_file=fs.url(filename) email=request.POST.get("txtEmail") pwd=request.POST.get("txtPassword") img=request.FILES["txtFile"] fs=FileSystemStorage() filename=fs.save(img.name,img) uploaded_file_url=fs.url(filename) 
+ 
+s="select count(*) from tbllogin where username='"+str(email)+"'" c.execute(s) i=c.fetchone() if(i[0]>0): 
+msg="User already registered" else: 
+s="insert into tbldesigner(dName,dAddress,dContact,dqualification,dqproof,dEmail,dPhoto) 
+values('"+str(name)+"','"+str(address)+"','"+str(contact)+"','"+str(quali)+"','"+str(uploaded_file)+"','"+str 
+(email)+"','"+str(uploaded_file_url)+"')" try: 
+c.execute(s) db.commit() except: 
+msg="Sorry registration error" else: 
+s="insert into tbllogin (username,password,utype,status) values('"+str(email)+"','"+str(pwd)+"','designer','0')" try: 
+c.execute(s) db.commit() except: 
+
+msg="Sorry login error" else: 
+
+msg="Registration successfull" 
+return render(request,"designer.html",{"msg":msg}) 
+
+ADMIN HOME
+adminhome(request): 
+""" 
+The function for adminhome 
+ 
+
+ 
+Parameters: 
+HTTP request 
+ 
+ 
+Returns: html page """ 
+return render(request,"adminhome.html") 
+
+ADMIN ARCHITECT
+adminarchitect(request): 
+The function for architect details for admin 
+ 
+
+ 
+Parameters: 
+HTTP request 
+ 
+ 
+Returns: html page """ 
+s="select * from tblarchitect where aEmail in(select username from tbllogin where status='0')" c.execute(s) data=c.fetchall() 
+s="select * from tblarchitect where aEmail in(select username from tbllogin where status='1')" c.execute(s) data1=c.fetchall() 
+return render(request,"adminarchitect.html",{"data":data,"data1":data1}) 
+
+ADMIN APPROVE CUSTOMER
+adminapproveuser(request): 
+""" 
+The function to approve users 
+ 
+
+ 
+
+Parameters: 
+HTTP request 
+ 
+ 
+Returns: html page """ 
+email=request.GET.get("id") status=request.GET.get("status") url=request.GET.get("url") 
+s="update tbllogin set status='"+status+"' where username='"+email+"'" 
+c.execute(s) db.commit() 
+c.execute("select utype from tbllogin where username='"+email+"'") k=c.fetchone() if(k[0]=='architect'): 
+n="Select aContact from tblarchitect where aEmail='"+email+"'" 
+c.execute(n) d=c.fetchone() contact=d[0] 
+msg="Your registeration is approved" sendsms(contact,msg) if(k[0]=='designer'): 
+n="Select dContact from tbldesigner where dEmail='"+email+"'" c.execute(n) d=c.fetchone() contact=d[0] 
+msg="Your registeration is approved" sendsms(contact,msg) if(k[0]=='contractor'): 
+n="Select cContact from tblcontractor where cEmail='"+email+"'" 
+c.execute(n) d=c.fetchone() contact=d[0] 
+msg="Your registeration is approved" sendsms(contact,msg) if(k[0]=='customer'): 
+n="Select cContact from tblcustomer where cEmail='"+email+"'" 
+c.execute(n) d=c.fetchone() contact=d[0] 
+
+
+
+
+
+
+
+CUSTOMER HOME
+customerhome(request): 
+""" 
+The function for customer home 
+ 
+
+ 
+Parameters: 
+HTTP request 
+ 
+ 
+Returns: html page """ 
+email=request.session["email"] 
+s="select * from tblcustomer where cEmail='"+email+"'" 
+c.execute(s) data=c.fetchall() 
+return render(request,"customerhome.html",{"data":data}) 
+
+
+CUSTOMER REQUIREMENT
+customerrequirement(request): 
+""" 
+The function for customer requirement 
+ 
+
+ 
+Parameters: 
+HTTP request 
+ 
+ 
+Returns: html page 
+""" email=request.session["email"] msg="" if(request.POST): 
+bed=request.POST["txtBed"] bath=request.POST["txtBath"] 
+
+attached=request.POST["txtAttached"] car=request.POST["txtCar"] kitchen=request.POST["txtKitchen"] 
+
+sitout=request.POST["txtSitout"] work=request.POST["txtWork"] floor=request.POST["txtFloor"] sqft=request.POST["txtSqft"] other=request.POST["txtOther"] 
+s="insert into 
+tblrequirement(cEmail,bedroom,bathroom,attached,carporch,kitchen,sitout,workarea,floor,sqft,other,req Date,reqStatus) 
+values('"+email+"','"+bed+"','"+bath+"','"+attached+"','"+car+"','"+kitchen+"','"+sitout+"','"+work+"','"+f loor+"','"+sqft+"','"+other+"',(select sysdate()),'requested')" try: 
+c.execute(s) db.commit() except: 
+msg="Sorry some error occured" else: 
+msg="Requirement submitted" 
+s="Select * from tblrequirement where cEmail='"+email+"' and tblrequirement.reqStatus<>'plan approved'" 
+c.execute(s) 
+data=c.fetchall() 
+return render(request,"customerrequirement.html",{"msg":msg,"data":data}) 
+
+CUSTOMER PLAN UPDATE
+customerplanupdate(request): 
+""" 
+The function to update plan status 
+ 
+
+ 
+Parameters: 
+HTTP request 
+ 
+ 
+Returns: html page """ 
+pid=request.GET.get("id") status=request.GET.get("status") 
+
+url=request.GET.get("url") rid=request.GET.get("rid") 
+s="update tblplan set planStatus='"+status+"' where planId='"+pid+"'" try: 
+c.execute(s) db.commit() 
+
+except: 
+pass else: if(status=="approved"): 
+status1="rejected" elif(status=="rejected"): status1="approved" 
+s="update tblplan set planStatus='"+status1+"' where reqId='"+rid+"' and planId<>'"+pid+"'" try: 
+c.execute(s) db.commit() except: pass else: if(status=="approved"): status="plan approved" 
+s="update tblrequirement set reqStatus='"+status+"' where reqId='"+rid+"'" try: 
+c.execute(s) db.commit() except: pass else: return HttpResponseRedirect("/"+url+"?id="+pid) else: 
+return HttpResponseRedirect("/"+url) 
+
+
+index.html 
+<!DOCTYPE html> 
+<html lang="en"> 
+ 
+ 
+<head> 
+<!-- Meta tags --> 
+<title>RAD</title> 
+<meta name="keywords" content="Realbuild a Realestate Responsive web template, Bootstrap Web Templates, Flat Web Templates, Android Compatible web template, 
+Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" /> 
+<meta charset="utf-8"> 
+<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+
+<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<!-- stylesheets --> 
+<link rel="stylesheet" href="../static/css/bootstrap.min.css"> 
+<link rel="stylesheet" href="../static/css/font-awesome.css"> 
+<link rel="stylesheet" href="../static/css/style.css"> 
+ 
+ 
+<!-- google fonts -->
+ 
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet"> 
+<link href="//fonts.googleapis.com/css?family=Raleway:300,400,500,600,700,700i,800,900" rel="stylesheet"> <!-- scripts --> 
+<script src="../static/js/jquery.min.js"></script> 
+</head> 
+ 
+ 
+<body> 
+<div class="video-responsive"> 
+<video class="video" muted="muted" loop="loop" autoplay="autoplay"> 
+<source src="../static/video/real2.mp4" type="video/mp4"> 
+Your browser does not support HTML5 video. 
+</video> 
+ 
+ 
+<canvas class="canvas"></canvas> 
+ 
+ 
+<div id="over_video"> 
+<div class="bg-mask"> 
+<nav class="navbar w3-navbar"> 
+<div class="navigation-overlay"> 
+<div class="container-fluid"> 
+<div class="nav-top"> 
+<div class="w3-contact"> 
+<!-- <a> <span class="fa fa-volume-control-phone" aria-hidden="true"> </span>+692 527 6524</a> 
+<a href="mailto:abcd@yoursite.com"><span class="fa fa-envelope-o" aria-hidden="true"></span>admin@realbuild.com</a> --> 
+</div> 
+<div class="w3-socials"> 
+<!-- <ul> 
+<li> 
+<a href="#"><span class="fa fa-facebook"></span></a> 
+</li> 
+<li> 
+<a href="#"><span class="fa fa-vk"></span></a> 
+</li> 
+<li> 
+<a href="#"><span class="fa fa-pinterest-p"></span></a> 
+</li> 
+<li> 
+<a href="#"><span class="fa fa-twitter"></span></a> 
+</li> 
+</ul> --> 
+</div>
+ 
+</div> 
+ 
+ 
+<div class="row"> 
+ 
+ 
+<div class="navbar-header"> 
+<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ 
+<span class="sr-only">Toggle navigation</span> 
+<span class="icon-bar"></span> 
+<span class="icon-bar"></span> <span class="icon-bar"></span> 
+</button> 
+ 
+ 
+<!-- Logo --> 
+<div class="logo-container"> 
+<div class="logo-wrap"> 
+<a href="#home" class="scroll"> 
+RAD 
+</a> 
+</div> 
+</div> 
+</div> <!-- end navbar-header --> 
+ 
+ 
+ 
+ 
+<div class="col-md-8 col-xs-12 nav-wrap"> 
+<div class="collapse text-center navbar-collapse w3ls-nav navbar-collapse"> 
+ 
+ 
+<ul class="nav navbar-nav w3ls-nav1 text-center"> 
+ 
+ 
+<li class="active"> 
+<a href="/" >Home</a> 
+</li> 
+<li> 
+<a href="/login" >Login</a> 
+</li> 
+<li> 
+<a href="/architect" >Architect</a> 
+</li> 
+<li> 
+<a href="/designer" >Designer</a> 
+</li> 
+<li> 
+<a href="/contractor">Contractor</a> 
+</li> 
+<li> 
+<a href="/customer" >Customer</a> 
+</li> 
+ 
+ 
+</ul> 
+</div> 
+</div> <!-- end col --> 
+</div> <!-- end row --> 
+</div> <!-- end container --> 
+</div> <!-- end navigation --> 
+</nav> <!-- end navbar --> 
+ 
+
+ 
+<div class="heading"> 
+<h1>New Way to Design is Online</h1> 
+<h3 align="center">One of the biggest achievements in life is considered to be building 
+one’s own house. <br>Whether you are building a home on a plot or have recently purchased an apartment flat, RAD.com helps you with all your planning and design needs without needing a time consuming and expensive visit to an engineer or a designer.</h3> 
+ 
+<!-- bootstrap-pop-up --> 
+<div class="modal video-modal fade" id="property0" tabindex="-1" role="dialog"> 
+<div class="modal-dialog" role="document"> 
+<div class="modal-content"> 
+<div class="modal-header"> 
+RAD 
+<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> 
+</div> 
+<section> 
+<div class="modal-body"> 
+<img src="C:\Users\XEUS\Desktop\RAD\RAD March 28\realistic\realisticapp\static\video\real2.jpg" alt=" " class="img-responsive" /> 
+<p>One of the biggest achievements in life is considered to be building one’s own house. 
+Whether you are building a home on a plot or have recently purchased an apartment flat, RAD.com helps you with all your planning and design needs without needing a time consuming and expensive visit to an engineer or a designer.</p> 
+</div> 
+</section> 
+</div> 
+</div> 
+</div> 
+<!-- //bootstrap-pop-up --> 
+</div> 
+  
+</div> 
+</div> 
+</div> 
+<style> .video-responsive { padding-bottom: 750px; position: relative; width: 100%; 
+} 
+  
+.canvas, .video 
+
+
+
+{ left: 0;
+
+ position: absolute; top: 0; background: #000; z-index: 5; overflow: hidden; width: 100%; height: 750px; object-fit: cover; 
+} 
+  
+#over_video { 
+position: absolute; width: 100%; height: 100%; text-align: center; top: 0; z-index: 10; color: #FFF; 
+} 
+@media screen and (max-width: 1280px) { 
+.video-responsive { padding-bottom: 650px; 
+} 
+.canvas, .video { height:
+ 650px; 
+} 
+} 
+@media screen and (max-width: 1080px) { 
+.video-responsive { padding-bottom: 600px; 
+} 
+
+.canvas, .video { height: 600px;
+ 
+} 
+} 
+@media screen and (max-width: 568px) { 
+.video-responsive { padding-bottom: 550px; 
+} 
+.canvas, .video { height: 550px; 
+} 
+} 
+</style> 
+ 
+ 
+<script src="../static/js/canvas-video-player.js"></script> 
+ 
+ 
+ 
+ 
+<script> 
+var isIOS = /iPad|iPhone|iPod/.test(navigator.platform); 
+ 
+ if (isIOS) { 
+ 
+ 
+var canvasVideo = new CanvasVideoPlayer({ videoSelector: '.video', canvasSelector: '.canvas', timelineSelector: false, autoplay: true, makeLoop: true
+
+, pauseOnClick: false, audio: false 
+}); 
+ 
+ 
+} else { 
+ 
+ 
+// Use HTML5 video
+ 
+document.querySelectorAll('.canvas')[0].style.display = 'none'; 
+} 
+</script> 
+ 
+ 
+<!-- About us --> 
+<div class="agile-about" id="about"> 
+<h3 class="center">About Us</h3> 
+<div class="container">
+ 
+<p size="30" align="center">RAD is a team of architects, designers and contractors who love designing, who love construction, who 
+love seeing a idea turn into a beautiful home.<br> 
+The team at RAD wishes you good luck with your design and constructions process.<br><br> 
+ 
+ 
+Happy Building!<br><br><br></p> 
+<div class="clearfix"></div> 
+</div> 
+ 
+ 
+ 
+ 
+</div> 
+<!-- //About us --> 
+<!-- Partners --> 
+ 
+ 
+<!-- //Partners --> 
+<!-- Gallery Property --> 
+ 
+ 
+<!-- //Gallery Property--> 
+<!-- our guides --> 
+ 
+ 
+<!-- //our guides --> 
+<!-- testimonials --> 
+<!-- //testimonials --> 
+<!-- contact --> 
+ 
+ 
+</div> 
+<!-- //contact --> 
+<!-- scripts --> 
+ 
+ 
+<script src="../static/js/bootstrap.min.js"></script> 
+ 
+ 
+ 
+ 
+<!-- smooth scrolling -->
+ 
+<script src="../static/js/SmoothScroll.min.js"></script> 
+<script type="text/javascript" src="../static/js/move-top.js"></script> 
+<script type="text/javascript" src="../static/js/easing.js"></script> 
+<!-- here stars scrolling icon --> 
+<script type="text/javascript"> 
+$(document).ready(function () { 
+/* var defaults = { 
+containerID: 'toTop', // fading element id 
+
+containerHoverID: 'toTopHover', // fading element hover id scrollSpeed: 1200, easingType: 'linear' 
+}; 
+*/ 
+ 
+ 
+$().UItoTop({ easingType: 'easeOutQuart' 
+}); 
+}); 
+</script> 
+<!-- //here ends scrolling icon --> 
+<!-- smooth scrolling --> 
+ 
+ 
+<!-- scrolling script --> <script type="text/javascript"> jQuery(document).ready(function ($) { $(".scroll").click(function (event) { event.preventDefault(); $('html,body').animate({ scrollTop: $(this.hash).offset().top 
+}, 1000); 
+}); 
+});
+ 
+</script> 
+<!-- //scrolling script --> 
+ 
+ 
+</body> 
+ 
+ 
+</html> 
+ 
+ 
+commonbase.html 
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+<!-- Meta tags --> 
+<title>RAD</title> 
+<meta name="keywords" content="Realbuild a Realestate Responsive web template, Bootstrap Web 
+Templates, Flat Web Templates, Android Compatible web template, 
+Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" /> 
+<meta charset="utf-8">
+ 
+<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<!-- stylesheets --> 
+<link rel="stylesheet" href="../static/css/bootstrap.min.css"> 
+<link rel="stylesheet" href="../static/css/font-awesome.css"> 
+<link rel="stylesheet" href="../static/css/style.css"> 
+ 
+ 
+<!-- google fonts --> 
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet"> 
+<link href="//fonts.googleapis.com/css?family=Raleway:300,400,500,600,700,700i,800,900" rel="stylesheet"> 
+<!-- scripts --> 
+<script src="../static/js/jquery.min.js"></script> 
+</head> 
+ 
+ 
+<body> 
+<div> 
+<video class="video" muted="muted" loop="loop" autoplay="autoplay" style="height:250px;"> 
+<source src="../static/video/real2.mp4" type="video/mp4"> 
+Your browser does not support HTML5 video. 
+</video> 
+ 
+ 
+<canvas style="max-height:250px;" class="canvas"></canvas> 
+ 
+ 
+<div id="over_video" style="max-height:250px;"> 
+<div class="bg-mask"> 
+<nav class="navbar w3-navbar"> 
+<div class="navigation-overlay">
+ 
+<div class="container-fluid"> 
+<div class="nav-top"> 
+<div class="w3-contact"> 
+ 
+ 
+</div> 
+<div class="w3-socials"> 
+ 
+ 
+</div> 
+</div> 
+ 
+ 
+<div class="row"> 
+ 
+ 
+<div class="navbar-header"> 
+<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"> 
+<span class="sr-only">Toggle navigation</span> 
+<span class="icon-bar"></span> 
+<span class="icon-bar"></span> <span class="icon-bar"></span> 
+</button> 
+ 
+ 
+<!-- Logo --> 
+<div class="logo-container"> 
+<div class="logo-wrap"> 
+<a href="#home" class="scroll"> 
+RAD 
+</a> 
+</div> 
+</div> 
+</div> <!-- end navbar-header --> 
+ 
+ 
+<div class="col-md-8 col-xs-12 nav-wrap"> 
+<div class="collapse text-center navbar-collapse w3ls-nav navbar-collapse"> 
+ 
+ 
+<ul class="nav navbar-nav w3ls-nav1 text-center"> 
+  
+<li> 
+<a href="/" >Home</a> 
+</li> 
+<li> 
+<a href="/login" >Login</a> 
+</li> 
+<li> 
+<a href="/architect" >Architect</a> 
+</li> 
+<li> 
+<a href="/designer" >Designer</a> 
+</li>
+ 
+<li> 
+<a href="/contractor">Contractor</a> 
+</li> 
+<li> 
+<a href="/customer" >Customer</a> 
+</li> 
+ 
+ 
+</ul> 
+</div> 
+</div> <!-- end col --> 
+</div> <!-- end row --> 
+</div> <!-- end container -->
+ 
+</div> <!-- end navigation --> 
+</nav> <!-- end navbar --> 
+ 
+ 
+ 
+ 
+ 
+</div> 
+</div> 
+</div> 
+<style> .video-
+responsive { padding-bottom: 750px; position: relative; width: 100%; 
+} 
+  
+.canvas, .video { left: 0; position: absolute; top: 0; background: #000; z-index: 5; overflow: hidden; width: 100%; 
+ 
+object-fit: cover; 
+} 
+  
+#over_video { position: absolute; 
+
+width: 100%; height: 100%; text-align: center; top: 0; z-index: 10; color: #FFF; 
+} 
+@media screen and (max-width: 1280px) { 
+.video-responsive { padding-bottom: 650px;
+ 
+} 
+  
+} 
+@media screen and (max-width: 1080px) { 
+.video-responsive { padding-bottom: 600px; 
+} 
+  
+} 
+@media screen and (max-width: 568px) { 
+.video-responsive { padding-bottom: 550px; 
+} 
+  
+} 
+</style> 
+ 
+ 
+<script src="../static/js/canvas-video-player.js"></script> <script> 
+var isIOS = /iPad|iPhone|iPod/.test(navigator.platform); 
+ 
+ 
+if (isIOS) { 
+ 
+ 
+var canvasVideo = new CanvasVideoPlayer({ videoSelector: '.video', canvasSelector: '.canvas', timelineSelector: false, autoplay: true, makeLoop: true, pauseOnClick: false, audio: false 
+}); 
+ 
+ 
+} else { 
+ 
+ 
+// Use HTML5 video 
+document.querySelectorAll('.canvas')[0].style.display = 'none'; 
+ 
+} 
+</script> 
+ 
+ 
+<div style="margin-top: 300px;"> 
+{% block content %} 
+ 
+{% endblock %}
+ 
+</div> 
+<!-- //contact --> 
+<!-- scripts --> 
+ 
+ 
+<script src="../static/js/bootstrap.min.js"></script> 
+ 
+ 
+ 
+ 
+<!-- smooth scrolling --> 
+<script src="../static/js/SmoothScroll.min.js"></script>
+ 
+<script type="text/javascript" src="../static/js/move-top.js"></script> 
+<script type="text/javascript" src="../static/js/easing.js"></script> 
+<!-- here stars scrolling icon --> 
+<script type="text/javascript"> 
+$(document).ready(function () { 
+/* var defaults = { 
+containerID: 'toTop', // fading element id containerHoverID: 'toTopHover', // fading element hover id scrollSpeed: 1200, easingType: 'linear' 
+}; 
+*/ 
+ 
+ 
+$().UItoTop({ easingType: 'easeOutQuart' 
+});   
+}); 
+</script>
+ 
+<!-- //here ends scrolling icon --> 
+<!-- smooth scrolling --> 
+<!-- scrolling script --> <script type="text/javascript"> jQuery(document).ready(function ($) { 
+$(".scroll").click(function (event) { event.preventDefault(); $('html,body').animate({ scrollTop: $(this.hash).offset().top 
+},
+
+ 1000); 
+}); 
+}); 
+</script> 
+<!-- //scrolling script --> 
+  
+</body> 
+  
+</html> 
+ 
+ 
+Login.html 
+{% extends 'commonbase.html' %} 
+
+{% block content %} <style> th,td{ padding: 10px; 
+} 
+</style> 
+<div style="margin:100px 50px 50px 50px;"> 
+<h1 style="margin: 50px;">Login</h1> 
+<center><form method="POST"> 
+{% csrf_token %} 
+<table style="margin: 50px;" > 
+<tr>
+<td>Username</td> 
+<td><input type="email" class="form-control" name="txtEmail" required></td> 
+</tr> 
+<tr> 
+<td>Password</td> 
+<td><input type="password" class="form-control" name="txtPassword" required></td> 
+</tr> 
+<tr> 
+<td></td> 
+<td><input type="submit" class="btn btn-primary" value="Login"></td> 
+</tr> 
+</table> 
+</form></center>
+ 
+</div> 
+<script> var msg="{{msg}}" if(msg!="") alert(msg) 
+</script> 
+{% endblock %} 
+ 
+ 
+Adminbase.html 
+ 
+ 
+<!DOCTYPE html> 
+<html lang="en"> 
+ 
+ 
+<head> 
+<!-- Meta tags --> 
+<title>Realistic 3D Architectural Design</title> 
+<meta name="keywords" content="Realbuild a Realestate Responsive web template, Bootstrap Web Templates, Flat Web Templates, Android Compatible web template, 
+Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" /> 
+<meta charset="utf-8"> 
+<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<!-- stylesheets --> 
+<link rel="stylesheet" href="../static/css/bootstrap.min.css"> 
+<link rel="stylesheet" href="../static/css/font-awesome.css"> 
+
+<link rel="stylesheet" href="../static/css/style.css"> 
+ 
+ 
+<!-- google fonts --> 
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet"> 
+<link href="//fonts.googleapis.com/css?family=Raleway:300,400,500,600,700,700i,800,900" rel="stylesheet"> 
+<!-- scripts --> 
+<script src="../static/js/jquery.min.js"></script> 
+</head> 
+ 
+ 
+<body> 
+<div> 
+<video class="video" muted="muted" loop="loop" autoplay="autoplay" style="height:250px;"> 
+<source src="../static/video/real2.mp4" type="video/mp4"> Your browser does not support HTML5 video. 
+</video> 
+ 
+ 
+<canvas style="max-height:250px;" class="canvas"></canvas> 
+ 
+ 
+<div id="over_video" style="max-height:250px;"> 
+<div class="bg-mask"> 
+<nav class="navbar w3-navbar"> 
+<div class="navigation-overlay"> 
+<div class="container-fluid"> 
+<div class="nav-top"> 
+<div class="w3-contact"> 
+ 
+ 
+</div> 
+<div class="w3-socials"> 
+ 
+ 
+</div> 
+</div> 
+ 
+ 
+<div class="row"> 
+ 
+ 
+<div class="navbar-header"> 
+<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"> 
+<span class="sr-only">Toggle navigation</span> 
+<span class="icon-bar"></span> 
+<span class="icon-bar"></span> <span class="icon-bar"></span> 
+</button> 
+
+ 
+ 
+<!-- Logo --> 
+<div class="logo-container"> 
+<div class="logo-wrap"> 
+<a href="#home" class="scroll"> 
+RAD 
+</a> 
+</div> 
+</div> 
+</div> <!-- end navbar-header --> 
+ 
+ 
+ 
+ 
+<div class="col-md-8 col-xs-12 nav-wrap"> 
+<div class="collapse text-center navbar-collapse w3ls-nav navbar-collapse"> 
+ 
+ 
+<ul class="nav navbar-nav w3ls-nav1 text-center"> 
+  
+<li> 
+<a href="/adminhome" >Home</a> 
+</li> 
+
+  
+<li> 
+<a href="/adminarchitect" >Architect</a> 
+</li> 
+<li> 
+<a href="/admindesigner" >Designer</a> 
+</li> 
+<li> 
+<a href="/admincontractor">Contractor</a> 
+</li> 
+<li> 
+<a href="/admincustomer" >Customer</a> 
+</li> 
+<li> 
+<a href="/login" >Logout</a> 
+</li> 
+</ul> 
+</div> 
+</div> <!-- end col --> 
+</div> <!-- end row --> 
+</div> <!-- end container --> 
+</div> <!-- end navigation --> 
+</nav> <!-- end navbar --> 
+ 
+ 
+ 
+ 
+ 
+</div> 
+</div> 
+</div> 
+<style> .video-responsive
+
+ { padding-bottom: 750px; position: relative; width: 100%; 
+} 
+  
+.canvas, .video { left: 0; position: absolute; top: 0; background: #000; z-index: 5; overflow: hidden; width: 100%; 
+ 
+object-fit: cover; 
+} 
+#over_video { position: absolute; width: 100%; height: 100%; text-align: center; top: 0; z-index: 10; color: #FFF; 
+}
+ 
+@media screen and (max-width: 1280px) { 
+.video-responsive { padding-bottom: 650px; 
+} 
+  
+} 
+@media screen and (max-width: 1080px) { 
+.video-responsive { padding-bottom: 600px; 
+} 
+  
+} 
+@media screen and (max-width: 568px) 
+
+{ 
+.video-responsive { padding-bottom: 550px; 
+} 
+  
+} 
+</style> 
+ 
+ 
+<script src="../static/js/canvas-video-player.js"></script> <script> 
+var isIOS = /iPad|iPhone|iPod/.test(navigator.platform); 
+ 
+ 
+if (isIOS) { 
+ 
+ 
+var canvasVideo = new CanvasVideoPlayer({ videoSelector: '.video', 
+
+canvasSelector: '.canvas', timelineSelector: false, autoplay: true, makeLoop: true, pauseOnClick: false, audio: false 
+});  
+ 
+} else { 
+ 
+ 
+// Use HTML5 video 
+document.querySelectorAll('.canvas')[0].style.display = 'none'; 
+ 
+} 
+</script> 
+ 
+ 
+<div style="margin-top: 300px;"> 
+{% block content %} 
+ 
+ 
+{% endblock %} 
+</div> 
+<!-- //contact --> 
+<!-- scripts --> 
+ 
+ 
+<script src="../static/js/bootstrap.min.js"></script> 
+ 
+ 
+ 
+ 
+<!-- smooth scrolling --> 
+<script src="../static/js/SmoothScroll.min.js"></script> 
+<script type="text/javascript" src="../static/js/move-top.js"></script> 
+<script type="text/javascript" src="../static/js/easing.js"></script> 
+<!-- here stars scrolling icon --> 
+<script type="text/javascript"> 
+$(document).ready(function () { 
+/* var defaults = { 
+containerID: 'toTop', // fading element id containerHoverID: 'toTopHover', // fading element hover id scrollSpeed: 1200, easingType: 'linear' 
+}; 
+*/ 
+ 
+ 
+$().UItoTop({
+
+ easingType: 'easeOutQuart' 
+});   
+}); 
+</script> 
+<!-- //here ends scrolling icon --> 
+<!-- smooth scrolling --> 
+ 
+ 
+<!-- scrolling script --> <script type="text/javascript"> jQuery(document).ready(function ($) { $(".scroll").click(function (event) { event.preventDefault(); $('html,body').animate({ scrollTop: $(this.hash).offset().top 
+}, 1000); 
+}); 
+}); 
+</script> 
+<!-- //scrolling script --> 
+ 
+ 
+</body> 
+ 
+ 
+</html> 
+ 
+ 
+Adminhome.html 
+{% extends 'adminbase.html' %} 
+{% block content %} <style> th,td{ padding: 10px; 
+} 
+</style> 
+<div style="margin:100px 50px 50px 50px;"> 
+<h1 style="margin: 50px;">Welcome Admin</h1> 
+  
+</div> 
+<script> var msg="{{msg}}" if(msg!="") alert(msg) 
+</script> 
+{% endblock %} 
+ 
+ 
+Customerhome.html 
+{% extends 'customerbase.html' %} 
+{% block content %} 
+<style> th,td{ padding: 10px; 
+} 
+</style> 
+<div style="margin:100px 50px 50px 50px;"> 
+<h1 style="margin: 50px;">Profile</h1> 
+<center><form method="POST" enctype="multipart/form-data">
+ 
+{% csrf_token %} 
+<table style="margin: 50px;" > 
+{% for d in data %} 
+<tr> 
+<td>Name</td> 
+<td><input type="text" readonly class="form-control" value="{{d.0}}" name="txtName" required pattern="[a-zA-Z ]+"></td> 
+</tr> 
+<tr> 
+<td>Address</td> 
+<td><textarea name="txtAddress" class="form-control" readonly required>{{d.1}}</textarea></td> 
+</tr> 
+<tr> 
+<td>Contact</td> 
+<td><input type="text" class="form-control" readonly value="{{d.2}}" name="txtContact" required pattern="[6789][0-9]{9}"></td> 
+</tr>
+ 
+<tr> 
+<td>Email</td> 
+<td><input type="text" class="form-control" readonly value="{{d.3}}" name="txtEmail" required ></td> 
+</tr> 
+{% endfor %} 
+</table> 
+</form></center> 
+</div> 
+<script> var msg="{{msg}}" if(msg!="") alert(msg) 
+</script> 
+{% endblock %}
+ 
+ 
+ 
+Designerhome.html 
+{% extends 'designerbase.html' %} 
+{% block content %} 
+<style> th,td{ padding: 10px; 
+} 
+</style> 
+<div style="margin:100px 50px 50px 50px;"> 
+<h1 style="margin: 50px;">Designer</h1> 
+<center><form method="POST" enctype="multipart/form-data"> 
+{% csrf_token %} 
+<table style="margin: 50px;" > 
+{% for d in data %} 
+<tr> 
+<td colspan="2"><img src="../static{{d.6}}" height="150px" width="150px"></td> 
+</tr> 
+
+<tr> 
+<td>Name</td> 
+<td><input type="text" class="form-control" name="txtName" value="{{d.0}}" required pattern="[a- zA-Z ]+"></td> 
+</tr> 
+<tr> 
+<td>Address</td> 
+<td><textarea name="txtAddress" class="form-control" required>{{d.1}}</textarea></td> 
+</tr> 
+<tr> 
+<td>Contact</td> 
+<td><input type="text" class="form-control" name="txtContact" value="{{d.2}}" required pattern="[6789][0-9]{9}"></td> 
+</tr> 
+<tr> 
+<td>Email</td> 
+<td><input type="text" class="form-control" value="{{d.3}}" name="txtEmail" required ></td> </tr> 
+
+{% endfor %} 
+</table> 
+</form></center> 
+</div> 
+<script> var msg="{{msg}}" if(msg!="") alert(msg) 
+</script> 
+{% endblock %} 
+ 
+ 
+Architecthome.html 
+{% extends 'architectbase.html' %} 
+{% block content %} 
+<style> th,td{ padding: 10px; 
+} 
+</style> 
+<div style="margin:100px 50px 50px 50px;"> 
+<h1 style="margin: 50px;">Profile</h1> 
+<center><form method="POST" enctype="multipart/form-data"> 
+{% csrf_token %} 
+<table style="margin: 50px;" > 
+{% for d in data %} 
+<tr> 
+<td>Name</td> 
+<td><input type="text" readonly class="form-control" value="{{d.0}}" name="txtName" required pattern="[a-zA-Z ]+"></td> 
+</tr>
+ 
+<tr> 
+<td>Address</td> 
+<td><textarea name="txtAddress" class="form-control" readonly required>{{d.1}}</textarea></td> 
+</tr> 
+<tr> 
+<td>Contact</td> 
+<td><input type="text" class="form-control" readonly value="{{d.2}}" name="txtContact" required pattern="[6789][0-9]{9}"></td> 
+</tr> 
+<tr> 
+<td>Email</td> 
+<td><input type="text" class="form-control" readonly value="{{d.3}}" name="txtEmail" required ></td> 
+</tr> 
+{% endfor %} 
+</table> 
+</form></center> 
+</div> 
+<script> var
+ msg="{{msg}}" if(msg!="") alert(msg) 
+</script> 
+{% endblock %} 
+ 
+ 
+Contractorhome.html 
+{% extends 'contractorbase.html' %} 
+{% block content %} 
+<style> 
+
+th,td{ padding: 10px; 
+} 
+</style> 
+<div style="margin:100px 50px 50px 50px;"> 
+<h1 style="margin: 50px;">Contractor</h1> 
+<center><form method="POST" enctype="multipart/form-data"> 
+{% csrf_token %} 
+<table style="margin: 50px;" > 
+{% for d in data %} 
+<tr> 
+<td>Name</td> 
+<td><input type="text" class="form-control" name="txtName" value="{{d.0}}" required pattern="[a- zA-Z ]+"></td> 
+</tr> 
+<tr> 
+<td>Address</td> 
+<td><textarea name="txtAddress" class="form-control" required>{{d.1}}</textarea></td> 
+</tr> 
+<tr> 
+
+<td>Contact</td> 
+<td><input type="text" class="form-control" name="txtContact" value="{{d.2}}" required pattern="[6789][0-9]{9}"></td> 
+</tr> 
+<tr> 
+<td>Email</td> 
+<td><input type="text" class="form-control" name="txtEmail" value="{{d.3}}" required ></td> </tr> 
+{% endfor %} 
+</table> 
+</form></center> 
+</div> 
+<script> var msg="{{msg}}" if(msg!="") alert(msg) 
+</script> 
+{% endblock %}
